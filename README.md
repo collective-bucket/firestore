@@ -30,7 +30,8 @@ npm run check        # generated file is up to date
 npm run test:rules   # emulator tests (needs Java 21); also runs ../mindset tests
 ```
 
-`test:rules` runs `tests/*.emulator.js` and mindset's `tests/rules.emulator.js`
+`test:rules` runs `tests/*.emulator.js` and mindset's `tests/rules.test.js`,
+`tests/rules.emulator.js`
 and `tests/sim.emulator.js` from a sibling checkout (`MINDSET_DIR`, default
 `../mindset`).
 
