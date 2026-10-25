@@ -1,0 +1,41 @@
+
+    // ---------------------------------------------------------------------
+    // budget
+    // ---------------------------------------------------------------------
+
+    match /budgets/{uid} {
+      function isOwner() {
+        return request.auth != null
+          && request.auth.uid == uid
+          && request.auth.uid == resource.data.ownerUid;
+      }
+
+      function validBudget() {
+        return request.resource.data.keys().hasAll([
+            'ownerUid', 'incomes', 'goals', 'months',
+            'createdAt', 'updatedAt'
+          ])
+          && request.resource.data.ownerUid == uid
+          && request.resource.data.incomes is list
+          && request.resource.data.incomes.size() <= 40
+          && request.resource.data.goals is list
+          && request.resource.data.goals.size() <= 40
+          && request.resource.data.months is map
+          && request.resource.data.createdAt is string
+          && request.resource.data.updatedAt is string;
+      }
+
+      allow read: if request.auth != null
+        && request.auth.uid == uid;
+
+      allow create: if request.auth != null
+        && request.auth.uid == uid
+        && request.resource.data.ownerUid == request.auth.uid
+        && validBudget();
+
+      allow update: if isOwner()
+        && request.resource.data.ownerUid == resource.data.ownerUid
+        && validBudget();
+
+      allow delete: if isOwner();
+    }

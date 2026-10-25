@@ -1,0 +1,54 @@
+name: Firestore rules
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7
+        with:
+          repository: collective-bucket/mindset
+          path: mindset
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+          cache: npm
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "21"
+      - run: npm ci
+      - run: npm run check
+      - run: npm run test:rules
+        env:
+          MINDSET_DIR: mindset
+
+  deploy:
+    if: github.event_name == 'push'
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+          cache: npm
+      - id: auth
+        uses: google-github-actions/auth@v3
+        with:
+          project_id: collective-bucket
+          workload_identity_provider: projects/239510573325/locations/global/workloadIdentityPools/github-actions/providers/github-provider
+          service_account: github-actions-deployer@collective-bucket.iam.gserviceaccount.com
+          token_format: access_token
+      - run: npm ci
+      - run: npx firebase-tools deploy --only firestore:rules,firestore:indexes --token "${{ steps.auth.outputs.access_token }}" --non-interactive

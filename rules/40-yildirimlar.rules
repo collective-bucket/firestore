@@ -1,0 +1,8 @@
+
+    // ---------------------------------------------------------------------
+    // yildirimlar (all data under apps/yildirimlar/...)
+    // ---------------------------------------------------------------------
+
+    match /apps/yildirimlar/{path=**} {
+      allow read, write: if false;
+    }

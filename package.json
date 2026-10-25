@@ -1,0 +1,16 @@
+{
+  "name": "collective-bucket-firestore",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Firestore rules and indexes for every Collective Bucket app (single source).",
+  "license": "MIT",
+  "scripts": {
+    "build": "node scripts/build.js",
+    "check": "node scripts/build.js --check",
+    "test:rules": "firebase emulators:exec --only firestore --project demo-mindset \"node scripts/test.js\"",
+    "deploy": "node scripts/build.js --check && firebase deploy --only firestore:rules,firestore:indexes"
+  },
+  "devDependencies": {
+    "firebase-tools": "^15.26.0"
+  }
+}
