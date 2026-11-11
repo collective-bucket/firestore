@@ -808,5 +808,22 @@ service cloud.firestore {
     match /apps/yildirimlar/{path=**} {
       allow read, write: if false;
     }
+
+    // Shared apartment notes on test.yildirimlar.co: public read, admin write.
+    match /apps/yildirimlar/daireler/{listingId} {
+      allow read: if true;
+      allow create, update: if request.auth != null
+        && request.auth.token.email == 'admin@collectivebucket.com'
+        && request.auth.token.email_verified == true
+        && listingId.matches('[0-9]{6,12}')
+        && request.resource.data.keys().hasOnly(['note', 'stars', 'updatedAt'])
+        && request.resource.data.note is string
+        && request.resource.data.note.size() <= 4000
+        && request.resource.data.stars is int
+        && request.resource.data.stars >= 0
+        && request.resource.data.stars <= 5
+        && request.resource.data.updatedAt is timestamp;
+      allow delete: if false;
+    }
   }
 }
