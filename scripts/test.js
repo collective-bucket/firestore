@@ -28,6 +28,8 @@ var mindsetTests = ["rules.emulator.js", "sim.emulator.js"].map(function (file) 
   return path.join(mindset, "tests", file);
 });
 if (mindsetTests.every(fs.existsSync)) {
+  process.env.RULES_FILE = path.join(root, "firestore.rules");
+  run(path.join(mindset, "tests", "rules.test.js"));
   mindsetTests.forEach(run);
 } else if (process.env.CI) {
   console.error("mindset checkout not found at " + mindset);
