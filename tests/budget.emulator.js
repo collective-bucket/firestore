@@ -55,6 +55,23 @@ async function call(method, url, uid, body) {
   assert.strictEqual(await call("POST", ROOT + "/budgets?documentId=bob", "ann", budget("bob")), 403, "cannot create for another uid");
   assert.strictEqual(await call("DELETE", ROOT + "/budgets/ann", "bob"), 403, "stranger cannot delete");
 
+  var withPlan = budget("ann");
+  withPlan.fields.debts = { arrayValue: { values: [{ mapValue: { fields: { id: { stringValue: "card" } } } }] } };
+  withPlan.fields.plan = { mapValue: { fields: { startCash: { integerValue: "0" } } } };
+  assert.strictEqual(await call("PATCH", ROOT + "/budgets/ann", "ann", withPlan), 200, "owner saves debts and plan");
+
+  var badDebts = budget("ann");
+  badDebts.fields.debts = { mapValue: { fields: {} } };
+  assert.strictEqual(await call("PATCH", ROOT + "/budgets/ann", "ann", badDebts), 403, "debts must be a list");
+
+  var tooManyDebts = budget("ann");
+  tooManyDebts.fields.debts = { arrayValue: { values: Array.from({ length: 41 }, function () { return { mapValue: { fields: {} } }; }) } };
+  assert.strictEqual(await call("PATCH", ROOT + "/budgets/ann", "ann", tooManyDebts), 403, "at most 40 debts");
+
+  var badPlan = budget("ann");
+  badPlan.fields.plan = { stringValue: "x" };
+  assert.strictEqual(await call("PATCH", ROOT + "/budgets/ann", "ann", badPlan), 403, "plan must be a map");
+
   assert.strictEqual(await call("GET", ROOT + "/apps/yildirimlar/profiles/ann", "ann"), 403, "yildirimlar is closed");
 
   console.log("budget rules ok");

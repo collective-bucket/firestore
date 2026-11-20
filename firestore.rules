@@ -782,6 +782,11 @@ service cloud.firestore {
           && request.resource.data.goals is list
           && request.resource.data.goals.size() <= 40
           && request.resource.data.months is map
+      && (!('debts' in request.resource.data)
+        || (request.resource.data.debts is list
+          && request.resource.data.debts.size() <= 40))
+      && (!('plan' in request.resource.data)
+        || request.resource.data.plan is map)
           && request.resource.data.createdAt is string
           && request.resource.data.updatedAt is string;
       }
